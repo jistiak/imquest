@@ -13,3 +13,7 @@ class ProviderError(ImQuestError):
 
 class ConfigurationError(ImQuestError):
     """Raised for missing or invalid package configuration."""
+
+
+class GenerationError(ImQuestError):
+    """Raised for AI generation provider failures."""

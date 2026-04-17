@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "imquest"
-version = "0.1.0"
-description = "Search photos across Pexels, Unsplash, and Flickr from one Python API."
+version = "0.2.1"
+description = "All-in-one image search, AI generation fallback, download, and TUI for terminals."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
