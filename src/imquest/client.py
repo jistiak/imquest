@@ -10,8 +10,12 @@ from imquest.exceptions import ConfigurationError
 from imquest.models import PhotoResult
 from imquest.providers.base import BaseProvider
 from imquest.providers.flickr import FlickrProvider
+from imquest.providers.google_cse import GoogleCSEProvider
+from imquest.providers.openverse import OpenverseProvider
 from imquest.providers.pexels import PexelsProvider
+from imquest.providers.pixabay import PixabayProvider
 from imquest.providers.unsplash import UnsplashProvider
+from imquest.providers.wikimedia import WikimediaCommonsProvider
 
 
 @dataclass(slots=True)
@@ -39,9 +43,13 @@ class ImQuestClient:
 
         creds = credentials or ProviderCredentials.from_env()
         self.providers = [
+            OpenverseProvider(timeout=timeout),
+            WikimediaCommonsProvider(timeout=timeout),
             PexelsProvider(creds.pexels_api_key, timeout=timeout),
             UnsplashProvider(creds.unsplash_access_key, timeout=timeout),
             FlickrProvider(creds.flickr_api_key, timeout=timeout),
+            PixabayProvider(creds.pixabay_api_key, timeout=timeout),
+            GoogleCSEProvider(creds.google_api_key, creds.google_cse_id, timeout=timeout),
         ]
 
     def configured_providers(self) -> list[BaseProvider]:
@@ -94,7 +102,7 @@ class ImQuestClient:
         configured = self.configured_providers()
         if not configured:
             raise ConfigurationError(
-                "No configured providers. Set API keys: PEXELS_API_KEY, UNSPLASH_ACCESS_KEY, FLICKR_API_KEY"
+                "No configured providers. Optional API keys: PEXELS_API_KEY, UNSPLASH_ACCESS_KEY, FLICKR_API_KEY, PIXABAY_API_KEY, GOOGLE_API_KEY + GOOGLE_CSE_ID"
             )
 
         if not provider_names:

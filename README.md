@@ -1,52 +1,51 @@
 # imquest
 
-`imquest` is a production-ready Python package for searching photos from multiple providers through one unified API.
+`imquest` is an all-in-one Python package for discovering images from multiple APIs with a single interface.
 
-It currently supports:
+## Supported services
 
-- **Pexels** (keyword search)
-- **Unsplash** (keyword search)
-- **Flickr** (keyword + geolocation search)
+### Works without account/API key
 
-By default, keyword search runs across all configured providers and returns normalized results.
+- **Openverse** (`openverse`) — open licensed image search endpoint.
+- **Wikimedia Commons** (`wikimedia`) — MediaWiki API based file search and geosearch.
 
-## Why imquest
+### Requires account/API key
 
-- One API surface for multiple image platforms
-- Unified result model (`PhotoResult`) across providers
-- Filter support for orientation and size
-- Optional provider targeting (`["pexels"]`, `["flickr"]`, etc.)
-- Location-based search (lat/lon) with Flickr by default
-- CLI for scripting and shell use
+- **Pexels** (`pexels`) — free API key.
+- **Unsplash** (`unsplash`) — access key.
+- **Flickr** (`flickr`) — API key.
+- **Pixabay** (`pixabay`) — API key.
+- **Google Programmable Search JSON API** (`google_cse`) — API key + CSE ID (legacy product; closed to new customers per Google docs).
+
+By default, `imquest` searches across every configured provider (including no-key providers).
 
 ## Install
-
-From source:
 
 ```bash
 pip install .
 ```
 
-Build wheel + source distribution:
+Build wheel:
 
 ```bash
-python -m build
+python -m pip wheel --no-build-isolation . -w dist
 ```
 
-Then install built artifacts:
+Install wheel:
 
 ```bash
 pip install dist/imquest-0.1.0-py3-none-any.whl
 ```
 
-## API credentials
-
-Set any provider keys you want to use. You can configure one, two, or all three.
+## Environment variables
 
 ```bash
 export PEXELS_API_KEY="..."
 export UNSPLASH_ACCESS_KEY="..."
 export FLICKR_API_KEY="..."
+export PIXABAY_API_KEY="..."
+export GOOGLE_API_KEY="..."
+export GOOGLE_CSE_ID="..."
 ```
 
 ## Python usage
@@ -56,67 +55,56 @@ from imquest import ImQuestClient, Orientation, Size
 
 client = ImQuestClient()
 
-# keyword search across configured providers
+# All configured providers (Openverse and Wikimedia always available)
 resp = client.search(
-    "mountain lake",
+    "autumn forest",
     orientation=Orientation.LANDSCAPE,
     size=Size.LARGE,
     per_page=5,
 )
 
-print(resp.total_results)
-print(resp.results[0])
+# Only certain providers
+resp2 = client.search("city skyline", providers=["openverse", "pixabay"])
 
-# location search (defaults to flickr)
-geo = client.search_by_location(37.7749, -122.4194, per_page=5)
+# Location search with Flickr (default) or Wikimedia
+geo = client.search_by_location(40.7128, -74.0060, provider="wikimedia", per_page=10)
 ```
 
 ## CLI usage
 
-Keyword search:
-
 ```bash
-imquest "city skyline" --orientation landscape --size large --per-page 5
-```
-
-Limit to specific providers:
-
-```bash
-imquest "city skyline" --providers pexels flickr
+imquest "northern lights" --providers openverse wikimedia pixabay --per-page 5
 ```
 
 Location search:
 
 ```bash
-imquest --lat 40.7128 --lon -74.0060 --per-page 5
+imquest --lat 37.7749 --lon -122.4194 --location-provider wikimedia
 ```
 
-## Project scope and roadmap
+## Notes about Google Images
 
-### Current scope
+`imquest` supports Google image search only through **Programmable Search JSON API** (`google_cse`). It is not browser scraping.
 
-- Unified search SDK and CLI
-- Provider abstractions for easier extension
-- Friendly errors for missing configuration
-- Test suite covering orchestration and provider parsing
+Google’s official docs state this API is closed to new customers and existing users must transition by **January 1, 2027**. Treat it as optional/legacy support.
 
-### Near-term possibilities
+## Scope / possibilities
 
-- Async HTTP mode for lower latency
-- Pagination helpers and cursors
-- Rate-limit awareness/retry middleware
-- Result scoring/ranking and de-duplication across providers
-- Optional metadata enrichments (licenses, EXIF, color palette)
+Current package scope includes:
+
+- Multi-provider keyword search
+- Optional location search (Flickr + Wikimedia)
+- Unified normalized output model
+- Provider-level extensibility for adding more backends
+
+Future upgrades can add:
+
+- Async execution and parallel provider fan-out
+- Deduplication and ranking across provider results
+- License-aware filtering and attribution exporters
+- Local caching and retry/rate-limit middleware
 
 ## Development
-
-Install dev tools:
-
-```bash
-pip install -e .[dev]
-```
-
-Run tests:
 
 ```bash
 pytest

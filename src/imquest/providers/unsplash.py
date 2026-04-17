@@ -33,7 +33,12 @@ class UnsplashProvider(BaseProvider):
 
         params: dict[str, str | int] = {"query": query, "per_page": per_page}
         if orientation:
-            params["orientation"] = orientation.value
+            orientation_map = {
+                Orientation.LANDSCAPE: "landscape",
+                Orientation.PORTRAIT: "portrait",
+                Orientation.SQUARE: "squarish",
+            }
+            params["orientation"] = orientation_map[orientation]
         if size:
             # Unsplash doesn't expose this directly; approximate via query enrichment.
             params["query"] = f"{query} {size.value}"
